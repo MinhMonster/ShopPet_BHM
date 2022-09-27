@@ -50,33 +50,36 @@
                             </div>
                         </div>
                         <div class="quantity-product flex-row text-left mgt-10px">
-                            <div class="">
-                                <div class="flex-row">
-                                    <div>Quantity: </div>
-                                        <div class="prev" @click="prev()">-</div>
-                                        <div class="quantily">{{quantity}}</div>
-                                        <!-- <input class="quantily" v-model="quantity"/> -->
-                                        <div class="next" @click="next()">+</div>
-                                        <div class="">( {{this.product.quantity}})</div>
 
-                                </div>
+                            <div class="flex-row-start-center">
+                                <div>Quantity: </div>
+
+                                <div class="prev mgl-10px" @click="prev()">-</div>
+                                <div class="quantily">{{cart.quantity}}</div>
+                                <!-- <input class="quantily" v-model="quantity"/> -->
+                                <div class="next mgr-10px" @click="next()">+</div>
+
+
+                                <div class="">(Max: {{this.product.quantity}} Products)</div>
+
                             </div>
+
                             <div class="list-content">
-                               
+
                             </div>
                         </div>
 
                         <div class="mgt-10px left">
                             <b-button variant="danger">Add To Cart</b-button>
                             <!-- <b-button  variant="outline-danger">Danger</b-button> -->
-                        <b-button class="mgl-10px" variant="primary">Buy Now</b-button>
+                            <b-button class="mgl-10px" variant="primary" @click="addCart()">Buy Now</b-button>
                         </div>
-                        
+
 
                     </div>
                 </div>
 
-                
+
 
             </div>
         </div>
@@ -97,10 +100,20 @@ export default {
                 author: "",
                 name: "",
                 price: "",
-                quantity:"",
+                quantity: "",
                 description: "",
                 time: "",
             },
+            carts: [],
+            cart: {
+                pid: "",
+                uid: "",
+                quantity: 1,
+                name: "",
+                price: "",
+                description: "",
+                time: ""
+            }
         };
     },
     created() {
@@ -109,6 +122,8 @@ export default {
         if (productId) {
             this.getProduct(productId);
         }
+        this.getAll();
+
     },
     methods: {
         ...mapActions([""]),
@@ -120,65 +135,129 @@ export default {
             this.$request.get(`http://localhost:8000/api/products/${productId}`).then((res) => {
                 this.product = res.data;
                 this.product.quantity = res.data.quantity
-                // console.log(this.product)
+                this.cart.pid = res.data.pid
+                this.cart.name = res.data.name
+                this.cart.price = res.data.price
+                this.cart.description = res.data.description
             });
         },
 
+        next() {
+            this.cart.quantity += 1;
+            console.log(this.cart.quantity);
+            console.log(this.product.quantity);
+
+
+            if (this.cart.quantity > this.product.quantity) {
+                this.cart.quantity = this.product.quantity;
+            }
+        },
+        prev() {
+            this.cart.quantity -= 1;
+            console.log(this.cart.quantity);
+            console.log(this.product.quantity);
+            if (this.cart.quantity < 1) {
+                this.cart.quantity = 1;
+            }
+        },
+        async addCart() {
+            // console.log(this.productId.id)
+
+            // if (this.productId.id) {
+            //     this.$request
+            //         .put(`http://localhost:8000/api/carts/${this.cart.pid}`, this.cart)
+            //         .then((res) => {
+            //             if (res.data.success) {
+            //                 this.$router.push({ name: "home.carts" });
+            //                 return;
+            //             }
+            //             alert("Errors");
+            //         });
+            //     return;
+            // }
+            
+            await this.getAll();
+            let max = 0;
+            let newID = 0;
+            // console.log(newID)
+            for (let i = 0; i < this.carts.length; i++) {
+                console.log(this.carts.length);
+                if (this.carts[i].cid > max) {
+                    max = this.carts[i].cid;
+                }
+                // return this.product.id
+            }
+            newID = max + 1;
+            this.cart.pid = newID;
+            console.log(newID);
+            var md5 = require("md5");
+            console.log(md5("message"));
+            this.cart.time = new Date().toLocaleString();
+            this.cart.cid = newID;
+            this.$request
+                .post("http://localhost:8000/api/carts", this.cart)
+                .then((res) => {
+                    if (res.data.success) {
+                        this.$router.push({ name: "home.carts" });
+                    }
+                });
+        },
+
+        async getAll() {
+            console.log(this.builUrl());
+            await this.$request.get(this.builUrl()).then((res) => {
+                this.carts = res.data;
+                var md5 = require("md5");
+                console.log(md5("message"));
+            });
+        },
         builUrl() {
-            return `http://localhost:8000/api/products`;
+            return `http://localhost:8000/api/carts`;
         },
-        next(){
-            this.quantity +=1
-            console.log(this.quantity)
-            console.log(this.product.quantity)
-
-
-            if (this.quantity > this.product.quantity) {
-                this.quantity = this.product.quantity;
-            }
-        },
-        prev(){
-            this.quantity -=1
-            if (this.quantity < 1) {
-                this.quantity = 1;
-            }
-        }
     },
 };
 </script>
 <style scoped>
-.prev, .next, .quantily {
+.prev,
+.next,
+.quantily {
     padding: 5px 10px;
     border: 1px solid #a4a4a4;
 }
-.quantily{
+
+.quantily {
     width: 50px;
     text-align: center;
 }
-.prev, .next{
+
+.prev,
+.next {
     cursor: pointer;
 }
+
 .content-product {
     border-radius: 10px;
     margin-top: 1em;
     border: 1px solid #e2e2e2;
     border-radius: 6px;
 }
-.list-title{
+
+.list-title {
     background: var(--light);
     border-radius: 10px 10px 0 0;
     margin-bottom: 0;
     padding: 0.5em 1em;
 }
 
-.list-content{
+.list-content {
     padding: 20px;
 }
 
-.list-content ul{
-    list-style:disc;
+.list-content ul {
+    list-style: disc;
 }
-.list-content ul li{
+
+.list-content ul li {
     padding: 5px;
 
 }

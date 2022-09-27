@@ -50,14 +50,20 @@
                             <div  class="card" v-for="(post, index) in List" :key="index">
                                 <img class="img-card" src="@/assets/images/products/gai-xinh-1.jpg" alt="">
                                 <div class="card-top">
-                                    <span class="item-1">{{ post.pid }} {{ post.name }}</span>
+                                    <span class="item-1">{{ post.cid }} {{ post.name }}</span>
                                     <span class="item-2">{{ post.price }}</span>
                                 </div>
                                 <div class="card-bottom flex-row-space-between" >
                                     <!-- <div class=""> -->
 
-                                        <div>VND: {{ post.price }}</div>
-                                        <div>Buy: 2899</div>
+                                        <div>
+                                            <div>
+                                                {{post.quantity}} x {{ post.price }}
+                                            </div>    
+                                            <div>Total: {{post.quantity *  post.price }}</div></div>
+                                        
+
+                                        <div>Time: {{ post.time }}</div>
                                     <!-- </div> -->
                                 </div>
 
@@ -135,10 +141,6 @@ export default {
     methods: {
         clickCallback(pageNum) {
             this.page.pageCount = pageNum - 1;
-
-            // this.params.page = pageNum;
-            // this.getAll();
-            // console.log(pageNum)
         },
         prev() {
             if (this.model.prev_page_url) {

@@ -166,7 +166,7 @@ export default {
         console.log(newID);
         var md5 = require("md5");
         console.log(md5("message"));
-        this.product.time = new Date().getTime();
+        this.product.time = new Date().toLocaleString();
         this.product.author = this.$store.state.user.email;
         this.product.pid = newID;
         this.$request
